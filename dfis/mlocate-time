@@ -1,0 +1,99 @@
+#!/usr/bin/perl
+#
+# mlocate-time -- Parses the file/directory and timestamp info from
+#                 Linux mlocate.db(5) files.
+#
+# The format of these files is described in the mlocate.db(5) manual page.  
+# I've included the relevant sections of the manual page in a comment at 
+# the end of this program.
+#
+# Catherine (Voidscripter) Winter '22
+#
+
+use strict;
+use Getopt::Std;
+
+$Getopt::Std::STANDARD_HELP_VERSION = 1;
+sub VERSION_MESSAGE {}
+sub HELP_MESSAGE {
+die <<'EoUseMsg';
+Usage: mlocate-time [-a] [-N] /var/lib/mlocate/mlocate.db
+
+-a    Show file names from DB (default is just show directory entries)
+-N    Show nanosecond resolution timestamps 
+
+Timestamps are displayed in your default time zone.  "export TZ=<tzname>"
+to display in some other time zone.
+EoUseMsg
+}
+
+my %opts = ();
+getopts('aN', \%opts);
+my $show_files = $opts{'a'};
+my $show_nanosec = $opts{'N'};
+
+my $EODir = chr(2);
+my($data, $buffer);
+
+unless (open(INP, "< $ARGV[0]")) {
+    warn "Can't open $ARGV[0]: $!\n";
+    HELP_MESSAGE();
+}
+binmode(INP);
+sysread(INP, $data, 4096);   # pulls the initial data, including the header
+
+# Get length of config block from header, then throw away header
+
+my $conf_block_len = unpack('N', substr($data, 8, 4));
+substr($data, 0, 16) = undef;
+
+# Read the null-terminated root path of the DB.  Then throwaway path
+# and configuration block.  That should take us to the first directory entry.
+
+my $path = unpack('Z*', $data);
+substr($data, 0, length($path)+1+$conf_block_len) = undef;
+
+while (length($data)) {
+
+    # Make sure we've got at least one complete dir entry
+    # in our $data.  Using rindex() here to make sure we're not
+    # matching a 2 byte in the next directory header.
+
+    while (rindex($data, $EODir) < 18 && sysread(INP, $buffer, 4096)) {
+	$data .= $buffer;
+    }
+
+    # Reads directory header, then throws it away after
+
+    my($high, $low, $nanosec, $pad, $dir) = unpack('N N N N Z*', $data);
+    substr($data, 0, length($dir)+17) = undef;
+
+    # Output directory name and timestamp
+    my($sec, $min, $hr, $day, $mon, $yr) = localtime(($high<<32) + $low);
+    $yr += 1900; $mon += 1;
+    my $stamp = sprintf("%d-%02d-%02d %02d:%02d:%02d",
+			$yr, $mon, $day, $hr, $min, $sec);
+    $stamp .= sprintf(".%09d", $nanosec) if ($show_nanosec);
+    print "$dir\t$stamp\n";
+    
+    # Read through all the file entries and outputs the regular files if needed.
+    # $data is reduced a bit as we read each file entry.  Directories will be 
+    # output when we hit their directory entry so we can output the timestamp
+    # from the directory header.
+    $dir = undef if ($dir eq '/');
+    while (unpack('c', $data) != 2) {               # 2 byte marks -- end of dir
+        my ($type, $file) = unpack('c Z*', $data);
+	substr($data, 0, length($file)+2) = undef;
+	next if ($type == 1);                       # 1 means it's a directory
+	print "$dir/$file\n" if ($show_files);
+    }
+
+    # We're sitting on the end of directory marker. Trash it
+
+    substr($data, 0, 1) = undef;
+
+    # End of directory may have fallen exactly at the end of our buffer.
+    sysread(INP, $data, 4096) unless (length($data));
+}
+close(INP);
+# END
