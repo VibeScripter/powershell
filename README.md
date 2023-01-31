@@ -5,3 +5,6 @@ Simple scripts etc etc will add continually. Supposed to also have Azure capabil
 FileEncrypt: Encrypts files, might do a remote function for this
 
 AzureShutdown: Starts at computer startup, checks auth keys for certain programs (see: O365 etc) and uhh... some other things. :)
+
+DFIR Scripts: Both help do a "mini deep dive" into certain system functions and collect information. One is written in Powershell, one in Visual Basic. There is also a whole folder of them written mainly in Perl just out of pure curiosity/learning for myself to understand Perl more
+
