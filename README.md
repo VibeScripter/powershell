@@ -8,5 +8,7 @@ Simple scripts etc etc will add continually. Supposed to also have Azure capabil
 
 **EC2-1:** allows the user utilizing EC2 buckets to auto-connect their device to the buckets upon device startup/wake
 
-**DFIR Scripts:** Both help do a "mini deep dive" into certain system functions and collect information. One is written in Powershell, one in Visual Basic. There is also a whole folder of them written mainly in Perl just out of pure curiosity/learning for myself to understand Perl more
+**DFIR Scripts:** Both help do a "mini deep dive" into certain system functions and collect information. One is written in Powershell, one in Visual Basic. There is also a whole folder of them written mainly in Perl just out of pure curiosity/learning for myself to understand Perl better
+
+**Azure Cloud Automation** Explained in the comments of each one, but these help automate processes such as starting and stopping blobs / VMs, certain services, checking power status and more!
 
