@@ -104,10 +104,10 @@ if ($vm)
         # Get current status of the VM
         $vmstatus = Get-AzureRmVM -RscGrpname $RscGrpname -Name $vmnamespace -Status
     
-        Write-Output "Checking if VM is in a Running State..."
+        Write-Output "Checking if VM is in a running..."
         If ($vmstatus.Statuses.Code -contains "PowerState/running")
         {
-            Write-Output "Stopping the VM as it is in a Running State..."
+            Write-Output "Stopping the VM as it is in a running..."
             $stopVM = Stop-AzureRmVM -RscGrpname $RscGrpname -Name $vmnamespace -Force
         }
 
@@ -127,10 +127,10 @@ if ($vm)
         # Get current status of the VM
         $vmstatus = Get-AzureRmVM -RscGrpname $RscGrpname -Name $vmnamespace -Status
     
-        Write-Output "Checking if VM is in a Running State..."
+        Write-Output "Checking if VM is in a running..."
         If ($vmstatus.Statuses.Code -contains "PowerState/running")
         {
-            Write-Output "Stopping the VM as it is in a Running State..."
+            Write-Output "Stopping the VM as it is in a running..."
             $stopVM = Stop-AzureRmVM -RscGrpname $RscGrpname -Name $vmnamespace -Force
         }
         
@@ -148,7 +148,7 @@ if ($vm)
 
     If ($stopVM)
     {
-        Write-Output "Restart the VM as it was stopped from a Running State..."
+        Write-Output "Restart the VM as it was stopped from a running..."
         Start-AzureRmVM -RscGrpname $RscGrpname -Name $vmnamespace -AsJob > $null
     }
 
